@@ -37,6 +37,11 @@ if (png.length < 8 || !png.subarray(0, 8).equals(SIGNATURE)) {
 if (png.length < 24) reject('file too short for an IHDR chunk');
 const width = png.readUInt32BE(16);
 const height = png.readUInt32BE(20);
+// The PNG spec requires non-zero IHDR dimensions; a 0-wide or 0-tall
+// image would otherwise slip past the upper-bound check below.
+if (width === 0 || height === 0) {
+  reject(`dimensions ${width}x${height} are invalid: width and height must be non-zero`);
+}
 if (width > MAX_SIDE || height > MAX_SIDE) {
   reject(`dimensions ${width}x${height} exceed the ${MAX_SIDE}x${MAX_SIDE} limit`);
 }
